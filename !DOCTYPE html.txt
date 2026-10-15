@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sakura & Rêh | Catálogo Digital</title>
+    <!-- Tailwind CSS para Estilização Moderna -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            DEFAULT: '#D4AF37',
+                            light: '#F3E5AB',
+                            dark: '#AA8C2C'
+                        }
+                        darkbg: '#121212'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Fontes Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #121212; color: #f3f4f6; }
+        h1, h2, h3, .font-serif { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); }
+        .gold-text { background: linear-gradient(135deg, #BF953F, #FCF6BA, #AA771C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gold-border { border-color: #D4AF37; }
+    </style>
+</head>
+<body class="bg-[#121212] text-gray-100 min-h-screen flex flex-col justify-between">
+
+    <!-- Topo / Header -->
+    <header class="bg-black border-b border-gold/30 sticky top-z-50 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showSection('home')">
+                <img src="1000474726.jpg" alt="Logo Sakura & Rêh" class="w-12 h-12 object-cover rounded-full border border-gold">
+                <div>
+                    <h1 class="text-2xl font-serif font-bold gold-text tracking-wide">Sakura & Rêh</h1>
+                    <p class="text-xs text-gray-400">Bolsas, Acessórios e Elegância</p>
+                </div>
+            </div>
+            
+            <!-- Barra de Pesquisa e Navegação -->
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <input type="text" id="searchInput" placeholder="O que você procura?" oninput="filterProducts()" class="bg-neutral-900 border border-gold/40 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-gold w-full md:w-64 text-white">
+                <button onclick="openAdminLogin()" class="text-xs border border-gold text-gold px-3 py-2 rounded-full hover:bg-gold hover:text-black transition">Painel Admin</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
+
+        <!-- Seção Home / Início -->
+        <section id="home-section" class="space-y-12">
+            <!-- Banner Principal -->
+            <div class="relative rounded-2xl overflow-hidden border border-gold/30 bg-gradient-to-r from-neutral-900 via-black to-neutral-900 p-8 md:p-16 text-center shadow-2xl">
+                <div class="max-w-2xl mx-auto space-y-4">
+                    <h2 class="text-3xl md:text-5xl font-serif font-bold gold-text">Elegância e Sofisticação</h2>
+                    <p class="text-gray-300 text-sm md:text-base">Explore nossa coleção exclusiva de bolsas, malas, mochilas, kits maternidade e acessórios selecionados especialmente para você.</p>
+                    <button onclick="showSection('catalog')" class="mt-4 gold-gradient text-black font-semibold px-8 py-3 rounded-full shadow-lg hover:opacity-95 transition transform hover:scale-105">Ver Catálogo Completo</button>
+                </div>
+            </div>
+
+            <!-- Categorias -->
+            <div>
+                <h3 class="text-2xl font-serif font-semibold mb-6 border-l-4 border-gold pl-3 text-gold">Nossas Categorias</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4" id="categories-grid">
+                    <!-- Gerado por JS -->
+                </div>
+            </div>
+
+            <!-- Destaques -->
+            <div>
+                <h3 class="text-2xl font-serif font-semibold mb-6 border-l-4 border-gold pl-3 text-gold">Destaques da Coleção</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="featured-grid">
+                    <!-- Gerado por JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Catálogo Completo -->
+        <section id="catalog-section" class="hidden space-y-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-gold/20 pb-4">
+                <h2 class="text-3xl font-serif font-bold gold-text">Catálogo Completo</h2>
+                <div id="category-filters" class="flex flex-wrap gap-2">
+                    <!-- Filtros gerados por JS -->
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="catalog-grid">
+                <!-- Gerado por JS -->
+            </div>
+        </section>
+
+        <!-- Seção Detalhes do Produto Individual -->
+        <section id="detail-section" class="hidden max-w-4xl mx-auto bg-neutral-900 border border-gold/30 rounded-2xl p-6 md:p-10 shadow-2xl">
+            <button onclick="showSection('catalog')" class="text-gold text-sm mb-6 hover:underline flex items-center gap-1">← Voltar ao Catálogo</button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="rounded-xl overflow-hidden border border-gold/20 bg-black flex items-center justify-center">
+                    <img id="detail-img" src="" alt="Produto" class="w-full h-80 object-cover">
+                </div>
+                <div class="space-y-4">
+                    <span id="detail-category" class="text-xs uppercase tracking-widest bg-gold/10 text-gold px-3 py-1 rounded-full border border-gold/30"></span>
+                    <h2 id="detail-name" class="text-3xl font-serif font-bold text-white"></h2>
+                    <p id="detail-price" class="text-2xl font-bold gold-text"></p>
+                    <p id="detail-measures" class="text-sm text-gray-300"></p>
+                    
+                    <!-- Opções de Cor -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-gray-400">Opções de Cor:</label>
+                        <div id="detail-colors" class="flex gap-2"></div>
+                    </div>
+
+                    <!-- Opções de Tamanho -->
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-gray-400">Opções de Tamanho:</label>
+                        <div id="detail-sizes" class="flex gap-2"></div>
+                    </div>
+
+                    <button onclick="openOrderModal()" class="w-full gold-gradient text-black font-bold py-3 rounded-xl shadow-lg hover:opacity-95 transition mt-4">Fazer Pedido</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Painel Administrativo -->
+        <section id="admin-section" class="hidden max-w-5xl mx-auto space-y-6">
+            <div class="flex justify-between items-center border-b border-gold/20 pb-4">
+                <h2 class="text-3xl font-serif font-bold gold-text">Painel Administrativo</h2>
+                <button onclick="showSection('home')" class="text-sm text-gray-400 hover:text-gold">Sair do Painel</button>
+            </div>
+
+            <!-- Abas do Admin -->
+            <div class="flex gap-4 border-b border-neutral-800 pb-2">
+                <button onclick="switchAdminTab('add')" id="tab-add" class="text-gold font-semibold pb-1 border-b-2 border-gold">Cadastrar Produto</button>
+                <button onclick="switchAdminTab('manage')" id="tab-manage" class="text-gray-400 hover:text-gold pb-1">Gerenciar Produtos</button>
+                <button onclick="switchAdminTab('orders')" id="tab-orders" class="text-gray-400 hover:text-gold pb-1">Ver Pedidos (Banco)</button>
+            </div>
+
+            <!-- Aba Cadastrar -->
+            <div id="admin-add-tab" class="space-y-4 bg-neutral-900 p-6 rounded-xl border border-gold/20">
+                <h3 class="text-xl font-serif text-gold">Adicionar Novo Produto</h3>
+                <form id="addProductForm" onsubmit="handleAddNewProduct(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-400">Nome do Produto</label>
+                        <input type="text" id="new-name" required class="w-full bg-black border border-gold/30 rounded p-2 text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Categoria</label>
+                        <select id="new-category" class="w-full bg-black border border-gold/30 rounded p-2 text-white text-sm">
+                            <option value="bolsas">Bolsas</option>
+                            <option value="mochilas">Mochilas</option>
+                            <option value="malas">Malas</option>
+                            <option value="necessaires">Necessaires</option>
+                            <option value="maternidade">Kits Maternidade</option>
+                            <option value="organizadores">Organizadores</option>
+                            <option value="pastas">Pastas</option>
+                            <option value="pochetes">Pochetes</option>
+                            <option value="acessorios">Acessórios</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Valor (R$)</label>
+                        <input type="number" step="0.01" id="new-price" required class="w-full bg-black border border-gold/30 rounded p-2 text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Medidas</label>
+                        <input type="text" id="new-measures" placeholder="Ex: 30cm x 20cm" required class="w-full bg-black border border-gold/30 rounded p-2 text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">3 Opções de Cores (separadas por vírgula)</label>
+                        <input type="text" id="new-colors" placeholder="Preto, Dourado, Branco" required class="w-full bg-black border border-gold/30 rounded p-2 text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">3 Opções de Tamanhos (separadas por vírgula)</label>
+                        <input type="text" id="new-sizes" placeholder="Pequeno, Médio, Grande" required class="w-full bg-black border border-gold/30 rounded p-2 text-white text-sm">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="text-xs text-gray-400">Link da Imagem (URL)</label>
+                        <input type="url" id="new-image" placeholder="https://exemplo.com/foto.jpg" required class="w-full bg-black border border-gold/30 rounded p-2 text-white text-sm">
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit" class="w-full gold-gradient text-black font-bold py-3 rounded shadow hover:opacity-95 transition">Cadastrar Produto</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Aba Gerenciar -->
+            <div id="admin-manage-tab" class="hidden space-y-4 bg-neutral-900 p-6 rounded-xl border border-gold/20">
+                <h3 class="text-xl font-serif text-gold">Lista de Produtos Cadastrados</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                            <tr class="border-b border-neutral-800 text-gold">
+                                <th class="p-2">Nome</th>
+                                <th class="p-2">Categoria</th>
+                                <th class="p-2">Preço</th>
+                                <th class="p-2">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-products-list">
+                            <!-- Gerado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Aba Pedidos -->
+            <div id="admin-orders-tab" class="hidden space-y-4 bg-neutral-900 p-6 rounded-xl border border-gold/20">
+                <h3 class="text-xl font-serif text-gold">Pedidos Salvos no Banco de Dados</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                            <tr class="border-b border-neutral-800 text-gold">
+                                <th class="p-2">Data/Hora</th>
+                                <th class="p-2">Cliente</th>
+                                <th class="p-2">Telefone</th>
+                                <th class="p-2">Produto</th>
+                                <th class="p-2">Cor / Tamanho</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-list">
+                            <!-- Gerado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de Senha do Admin -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-gold/40 rounded-2xl p-6 max-w-sm w-full space-y-4">
+            <h3 class="text-xl font-serif text-gold">Acesso Restrito</h3>
+            <p class="text-xs text-gray-400">Digite a senha para acessar o painel administrativo.</p>
+            <input type="password" id="admin-password-input" placeholder="Senha" class="w-full bg-black border border-gold/30 rounded p-2 text-white text-sm">
+            <div class="flex gap-2">
+                <button onclick="closeAdminModal()" class="w-1/2 bg-neutral-800 text-gray-300 py-2 rounded text-sm">Cancelar</button>
+                <button onclick="verifyAdminPassword()" class="w-1/2 gold-gradient text-black font-bold py-2 rounded text-sm">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Fazer Pedido -->
+    <div id="order-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-gold/40 rounded-2xl p-6 max-w-md w-full space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-serif text-gold">Finalizar Pedido</h3>
+                <button onclick="closeOrderModal()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <form id="orderForm" onsubmit="submitOrder(event)" class="space-y-3">
+                <div>
+                    <label class="text-xs text-gray-400">Seu Nome</label>
+                    <input type="text" id="client-name" required class="w-full bg-black border border-gold/30 rounded p-2 text-white text-sm">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400">Seu WhatsApp (Telefone)</label>
+                    <input type="text" id="client-phone" placeholder="(21) 99999-9999" required class="w-full bg-black border border-gold/30 rounded p-2 text-white text-sm">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400">Produto Escolhido</label>
+                    <input type="text" id="order-product-name" readonly class="w-full bg-black/50 border border-gold/20 rounded p-2 text-gray-300 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs text-gray-400">Cor Selecionada</label>
+                        <input type="text" id="order-product-color" readonly class="w-full bg-black/50 border border-gold/20 rounded p-2 text-gray-300 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Tamanho Selecionado</label>
+                        <input type="text" id="order-product-size" readonly class="w-full bg-black/50 border border-gold/20 rounded p-2 text-gray-300 text-sm">
+                    </div>
+                </div>
+                <button type="submit" class="w-full gold-gradient text-black font-bold py-3 rounded-xl shadow hover:opacity-95 transition mt-2">Confirmar e Enviar para WhatsApp</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <footer class="bg-black border-t border-gold/30 py-8 mt-12 text-center text-xs text-gray-400 space-y-2">
+        <div class="flex justify-center items-center gap-2">
+            <img src="1000474726.jpg" alt="Logo" class="w-8 h-8 rounded-full border border-gold">
+            <span class="font-serif text-gold font-bold text-sm">Sakura & Rêh</span>
+        </div>
+        <p>Rio de Janeiro - RJ</p>
+        <p>WhatsApp: (21) 972371504 | Instagram: @sakura_reh</p>
+        <p class="text-gray-500">CPF: [Seu CPF aqui]</p>
+        <p class="text-[10px] text-neutral-600 mt-4">© 2026 Sakura & Rêh - Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Lógica JavaScript e Banco de Dados -->
+    <script>
+        // Configuração Firebase (Simulada/Padrão para armazenamento web local ou nuvem)
+        // Substitua abaixo pelas suas credenciais do Firebase caso deseje salvar online
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyKeyForDemoPurposes12345",
+            authDomain: "sakura-reh.firebaseapp.com",
+            projectId: "sakura-reh",
+            storageBucket: "sakura-reh.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+        
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+        } catch(e) {
+            console.log("Firebase rodando em modo local/offline");
+        }
+
+        // Categorias e Produtos Iniciais (Garantindo 20+ por categoria estruturada)
+        const categories = [
+            { id: 'bolsas', name: 'Bolsas', icon: '👜' },
+            { id: 'mochilas', name: 'Mochilas', icon: '🎒' },
+            { id: 'malas', name: 'Malas', icon: '🧳' },
+            { id: 'necessaires', name: 'Necessaires', icon: '👝' },
+            { id: 'maternidade', name: 'Kits Maternidade', icon: '🍼' },
+            { id: 'organizadores', name: 'Organizadores', icon: '📦' },
+            { id: 'pastas', name: 'Pastas', icon: '📁' },
+            { id: 'pochetes', name: 'Pochetes', icon: '👛' },
+            { id: 'acessorios', name: 'Acessórios', icon: '✨' }
+        ];
+
+        // Gerando base de produtos rica para bater a quantidade solicitada
+        let products = [];
+        const baseNames = {
+            bolsas: ["Bolsa Luxo Executive", "Bolsa Matelassê Dourada", "Bolsa Transversal Class", "Bolsa Tote Elegance", "Bolsa Sacola Prestige", "Bolsa de Ombro Saphire", "Bolsa Casual Chic", "Bolsa Festa Shine", "Bolsa Baú Vintage", "Bolsa Monet", "Bolsa Verão Gold", "Bolsa Urban Style", "Bolsa Minimal Black", "Bolsa Soft Touch", "Bolsa Royal Diamond", "Bolsa Dubai Edition", "Bolsa Parisienne", "Bolsa Metropolitan", "Bolsa Velvet Gold", "Bolsa Piazza"],
+            mochilas: ["Mochila Executiva Impermeável", "Mochila Casual Dourada", "Mochila Escolar Premium", "Mochila Notebook Slim", "Mochila Urban Refined", "Mochila Viagem Comfort", "Mochila Compact Lux", "Mochila Velvet Style", "Mochila Sport Chic", "Mochila Minimalist Black", "Mochila Touch Gold", "Mochila Star Shine", "Mochila Business Pro", "Mochila Day by Day", "Mochila Active Luxury", "Mochila Classic Line", "Mochila Soft Code", "Mochila Master Series", "Mochila Grand Voyager", "Mochila Prestige"],
+            malas: ["Mala de Bordo Rigida Gold", "Mala Viagem Grande Executive", "Mala Média com Rodinhas 360", "Mala Executiva de Mão", "Mala Viagem Premium Black", "Mala Compact Lux", "Mala Diamond Edition", "Mala Weekend Trip", "Mala Classic Travel", "Mala Global Explorer", "Mala Sky Master", "Mala Royal Flight", "Mala Jetset Black", "Mala Voyager Gold", "Mala First Class", "Mala Horizon Pro", "Mala Odyssey Lux", "Mala Prestige Trip", "Mala Supreme Journey", "Mala Elite Boarding"],
+            necessaires: ["Necessaire Viagem Impermeável", "Necessaire Golden Zipper", "Necessaire Média Make", "Necessaire Masculina Executiva", "Necessaire Compacta Black", "Necessaire Dupla Face", "Necessaire Luxo Matelassê", "Necessaire Velvet Touch", "Necessaire Organizadora Pro", "Necessaire Estojo Chic", "Necessaire Day Trip", "Necessaire Golden Hour", "Necessaire Minimal Black", "Necessaire Saphire Line", "Necessaire Royal Make", "Necessaire Diamond Case", "Necessaire Urban Bag", "Necessaire Soft Beauty", "Necessaire Master Kit", "Necessaire Prestige Gold"],
+            maternidade: ["Kit Maternidade 5 Peças Luxo", "Bolsa Maternidade Grande Dourada", "Mochila Maternidade Multifuncional", "Frasqueira Térmica Maternidade", "Trocador Portátil Acolchoado", "Kit Bolsa Maternidade Prestige", "Mochila Térmica Bebê Gold", "Bolsa Maternidade Royal Blue", "Kit Saída Maternidade Chic", "Bolsa Bebê Matelassê Black", "Mochila Maternidade Master", "Frasqueira Luxo Bebê", "Kit Maternidade Complete", "Bolsa Maternidade Soft Touch", "Mochila Maternidade Elegance", "Trocador Luxo Confort", "Bolsa Maternidade Classic", "Mochila Maternidade Star", "Kit Maternidade Premium", "Bolsa Maternidade Supreme"],
+            organizadores: ["Organizador de Mala 6 Peças", "Necessaire Organizadora Closet", "Organizador de Bolsa Multifunção", "Colmeia Organizadora de Gaveta", "Organizador de Sapatos Luxo", "Porta Joias Viagem Compacto", "Organizador de Maquiagem Acrílico", "Kit Organizadores Golden", "Organizador Suspenso Closet", "Porta Documentos Executivo", "Organizador Nécessaire Box", "Bolsa Organizadora Porta-Tudo", "Organizador de Bolsas Interno", "Porta Cartões e Acessórios", "Organizador de Fios e Tech", "Capa Protetora de Roupas", "Organizador de Mala Premium", "Necressaire Organizadora Dual", "Organizador de Bolsa Velvet", "Kit Organizador Master"],
+            pastas: ["Pasta Executiva para Notebook", "Pasta Fichário em Couro Lux", "Pasta Portfólio Slim Dourada", "Pasta Reunião Business Black", "Pasta Documentos Impermeável", "Pasta Executive Case", "Pasta Class Gold Line", "Pasta Universitaria Premium", "Pasta Transversal Business", "Pasta Master Pro", "Pasta Organizer Office", "Pasta Diplomata Luxo", "Pasta Casual Office", "Pasta Notebook Velvet", "Pasta Suprema Line", "Pasta Travel Work", "Pasta Smart Business", "Pasta Elite Office", "Pasta Grand Work", "Pasta Prestige Office"],
+            pochetes: ["Pochete Luxo Transversal", "Pochete Casual Dourada", "Pochete Executiva Slim", "Pochete Velvet Elegance", "Pochete Sport Chic", "Pochete Minimal Black", "Pochete Gold Chain", "Pochete Urban Style", "Pochete Touch Soft", "Pochete Day by Day", "Pochete Classic Line", "Pochete Master Series", "Pochete Prestige", "Pochete Saphire", "Pochete Diamond", "Pochete Night Out", "Pochete Travel Fit", "Pochete Active Lux", "Pochete Grand Style", "Pochete Supreme"],
+            acessorios: ["Porta Cartões de Couro Gold", "Carteira Feminina Executiva", "Cinto Elegance Fivela Dourada", "Porta Chaves Luxo", "Capa de Passaporte e Documentos", "Chaveiro Pompons Sakura", "Carteira Slim Black", "Porta Óculos Rígido Luxo", "Espelho de Bolsa Dourado", "Alça Removível para Bolsa", "Cinto Double Side Gold", "Porta Moedas Chic", "Kit Higiene Pessoal Luxo", "Necessaire Porta Relógio", "Carteira Mão Envelope", "Capa Protetora Passaporte", "Organizador de Carteira", "Etiqueta de Mala Personalizada", "Porta Cartões Slim", "Acessório Charm Golden"]
+        };
+
+        let idCounter = 1;
+        for (let cat in baseNames) {
+            baseNames[cat].forEach((name, idx) => {
+                products.push({
+                    id: idCounter++,
+                    name: name,
+                    category: cat,
+                    price: 129.90 + (idx * 15.50),
+                    measures: "Altura: 30cm | Largura: 40cm | Profundidade: 15cm",
+                    colors: ["Preto Clássico", "Dourado Luxo", "Branco Pérola"],
+                    sizes: ["Pequeno", "Médio", "Grande"],
+                    image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&auto=format&fit=crop&q=60"
+                });
+            });
+        }
+
+        let currentProduct = null;
+        let selectedColor = "";
+        let selectedSize = "";
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategories();
+            renderFeatured();
+            renderCatalogFilters();
+            renderCatalog();
+        });
+
+        function showSection(sectionId) {
+            document.getElementById('home-section').classList.add('hidden');
+            document.getElementById('catalog-section').classList.add('hidden');
+            document.getElementById('detail-section').classList.add('hidden');
+            document.getElementById('admin-section').classList.add('hidden');
+
+            if(sectionId === 'home') document.getElementById('home-section').classList.remove('hidden');
+            if(sectionId === 'catalog') document.getElementById('catalog-section').classList.remove('hidden');
+            if(sectionId === 'detail') document.getElementById('detail-section').classList.remove('hidden');
+            if(sectionId === 'admin') document.getElementById('admin-section').classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function renderCategories() {
+            const grid = document.getElementById('categories-grid');
+            grid.innerHTML = categories.map(cat => `
+                <div onclick="filterByCategory('${cat.id}')" class="bg-neutral-900 border border-gold/30 hover:border-gold rounded-xl p-4 text-center cursor-pointer transition transform hover:-translate-y-1 shadow-md">
+                    <div class="text-3xl mb-2">${cat.icon}</div>
+                    <span class="text-xs font-semibold text-gray-200">${cat.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderFeatured() {
+            const grid = document.getElementById('featured-grid');
+            const featured = products.slice(0, 8);
+            grid.innerHTML = featured.map(p => productCardHtml(p)).join('');
+        }
+
+        function renderCatalogFilters() {
+            const container = document.getElementById('category-filters');
+            container.innerHTML = `<button onclick="filterByCategory('all')" class="text-xs px-3 py-1.5 rounded-full border border-gold bg-gold text-black font-semibold">Todos</button>` +
+                categories.map(cat => `<button onclick="filterByCategory('${cat.id}')" class="text-xs px-3 py-1.5 rounded-full border border-gold/40 text-gray-300 hover:border-gold">${cat.name}</button>`).join('');
+        }
+
+        function renderCatalog(filter = 'all', search = '') {
+            const grid = document.getElementById('catalog-grid');
+            let filtered = products;
+            if(filter !== 'all') {
+                filtered = filtered.filter(p => p.category === filter);
+            }
+            if(search.trim() !== '') {
+                filtered = filtered.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+            }
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center text-gray-400 py-12">Nenhum produto encontrado.</p>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => productCardHtml(p)).join('');
+        }
+
+        function productCardHtml(p) {
+            return `
+                <div class="bg-neutral-900 border border-gold/30 rounded-xl overflow-hidden shadow-xl flex flex-col justify-between group">
+                    <div class="overflow-hidden bg-black h-48 relative">
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-4 space-y-2 flex-grow flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] uppercase text-gold tracking-widest">${p.category}</span>
+                            <h4 class="font-serif font-bold text-base text-white line-clamp-1">${p.name}</h4>
+                            <p class="text-sm font-semibold text-gold">R$ ${p.price.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                        <button onclick="openDetail(${p.id})" class="w-full mt-2 border border-gold text-gold text-xs py-2 rounded-lg hover:bg-gold hover:text-black font-semibold transition">Ver Detalhes</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterByCategory(catId) {
+            showSection('catalog');
+            renderCatalog(catId);
+        }
+
+        function filterProducts() {
+            const query = document.getElementById('searchInput').value;
+            showSection('catalog');
+            renderCatalog('all', query);
+        }
+
+        function openDetail(id) {
+            currentProduct = products.find(p => p.id === id);
+            if(!currentProduct) return;
+
+            document.getElementById('detail-img').src = currentProduct.image;
+            document.getElementById('detail-category').innerText = currentProduct.category;
+            document.getElementById('detail-name').innerText = currentProduct.name;
+            document.getElementById('detail-price').innerText = `R$ ${currentProduct.price.toFixed(2).replace('.', ',')}`;
+            document.getElementById('detail-measures').innerText = `Medidas: ${currentProduct.measures}`;
+
+            selectedColor = currentProduct.colors[0];
+            selectedSize = currentProduct.sizes[0];
+
+            document.getElementById('detail-colors').innerHTML = currentProduct.colors.map((c, idx) => `
+                <button onclick="selectColor('${c}')" class="px-3 py-1 rounded border text-xs ${idx === 0 ? 'border-gold bg-gold/20 text-gold' : 'border-neutral-700 text-gray-300'}" id="col-${c}">${c}</button>
+            `).join('');
+
+            document.getElementById('detail-sizes').innerHTML = currentProduct.sizes.map((s, idx) => `
+                <button onclick="selectSize('${s}')" class="px-3 py-1 rounded border text-xs ${idx === 0 ? 'border-gold bg-gold/20 text-gold' : 'border-neutral-700 text-gray-300'}" id="siz-${s}">${s}</button>
+            `).join('');
+
+            showSection('detail');
+        }
+
+        function selectColor(color) {
+            selectedColor = color;
+            currentProduct.colors.forEach(c => {
+                const el = document.getElementById(`col-${c}`);
+                if(el) {
+                    if(c === color) {
+                        el.className = "px-3 py-1 rounded border text-xs border-gold bg-gold/20 text-gold";
+                    } else {
+                        el.className = "px-3 py-1 rounded border text-xs border-neutral-700 text-gray-300";
+                    }
+                }
+            });
+        }
+
+        function selectSize(size) {
+            selectedSize = size;
+            currentProduct.sizes.forEach(s => {
+                const el = document.getElementById(`siz-${s}`);
+                if(el) {
+                    if(s === size) {
+                        el.className = "px-3 py-1 rounded border text-xs border-gold bg-gold/20 text-gold";
+                    } else {
+                        el.className = "px-3 py-1 rounded border text-xs border-neutral-700 text-gray-300";
+                    }
+                }
+            });
+        }
+
+        function openOrderModal() {
+            if(!currentProduct) return;
+            document.getElementById('order-product-name').value = currentProduct.name;
+            document.getElementById('order-product-color').value = selectedColor;
+            document.getElementById('order-product-size').value = selectedSize;
+            document.getElementById('order-modal').classList.remove('hidden');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+        }
+
+        function submitOrder(e) {
+            e.preventDefault();
+            const clientName = document.getElementById('client-name').value;
+            const clientPhone = document.getElementById('client-phone').value;
+            const orderData = {
+                clientName,
+                clientPhone,
+                productName: currentProduct.name,
+                color: selectedColor,
+                size: selectedSize,
+                timestamp: new Date().toLocaleString()
+            };
+
+            // Salvar no Firestore se disponível, senão localStorage
+            if(db) {
+                db.collection("orders").add(orderData).catch(err => console.log(err));
+            } else {
+                let localOrders = JSON.parse(localStorage.getItem('sakura_orders') || '[]');
+                localOrders.push(orderData);
+                localStorage.setItem('sakura_orders', JSON.stringify(localOrders));
+            }
+
+            // Redirecionamento para WhatsApp solicitado
+            const msg = `Olá! Gostaria de fazer um pedido:%0A%0A*Cliente:* ${clientName}%0A*Telefone:* ${clientPhone}%0A*Produto:* ${currentProduct.name}%0A*Cor:* ${selectedColor}%0A*Tamanho:* ${selectedSize}%0A*Valor:* R$ ${currentProduct.price.toFixed(2)}`;
+            window.location.href = `https://wa.me/qr/WWNVGIQ3LYEVB1?text=${msg}`;
+        }
+
+        // Funções do Painel Admin
+        function openAdminLogin() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPassword() {
+            const pass = document.getElementById('admin-password-input').value;
+            if(pass === 'sakura2026') {
+                closeAdminModal();
+                document.getElementById('admin-password-input').value = '';
+                showSection('admin');
+                renderAdminManageList();
+                renderAdminOrdersList();
+            } else {
+                alert('Senha incorreta!');
+            }
+        }
+
+        function switchAdminTab(tab) {
+            document.getElementById('admin-add-tab').classList.add('hidden');
+            document.getElementById('admin-manage-tab').classList.add('hidden');
+            document.getElementById('admin-orders-tab').classList.add('hidden');
+            
+            document.getElementById('tab-add').className = "text-gray-400 hover:text-gold pb-1";
+            document.getElementById('tab-manage').className = "text-gray-400 hover:text-gold pb-1";
+            document.getElementById('tab-orders').className = "text-gray-400 hover:text-gold pb-1";
+
+            if(tab === 'add') {
+                document.getElementById('admin-add-tab').classList.remove('hidden');
+                document.getElementById('tab-add').className = "text-gold font-semibold pb-1 border-b-2 border-gold";
+            } else if(tab === 'manage') {
+                document.getElementById('admin-manage-tab').classList.remove('hidden');
+                document.getElementById('tab-manage').className = "text-gold font-semibold pb-1 border-b-2 border-gold";
+                renderAdminManageList();
+            } else if(tab === 'orders') {
+                document.getElementById('admin-orders-tab').classList.remove('hidden');
+                document.getElementById('tab-orders').className = "text-gold font-semibold pb-1 border-b-2 border-gold";
+                renderAdminOrdersList();
+            }
+        }
+
+        function handleAddNewProduct(e) {
+            e.preventDefault();
+            const newP = {
+                id: products.length + 1,
+                name: document.getElementById('new-name').value,
+                category: document.getElementById('new-category').value,
+                price: parseFloat(document.getElementById('new-price').value),
+                measures: document.getElementById('new-measures').value,
+                colors: document.getElementById('new-colors').value.split(',').map(s => s.trim()),
+                sizes: document.getElementById('new-sizes').value.split(',').map(s => s.trim()),
+                image: document.getElementById('new-image').value
+            };
+            products.unshift(newP);
+            alert('Produto cadastrado com sucesso!');
+            document.getElementById('addProductForm').reset();
+            renderFeatured();
+            renderCatalog();
+        }
+
+        function renderAdminManageList() {
+            const tbody = document.getElementById('admin-products-list');
+            tbody.innerHTML = products.map(p => `
+                <tr class="border-b border-neutral-800">
+                    <td class="p-2">${p.name}</td>
+                    <td class="p-2 uppercase text-xs text-gold">${p.category}</td>
+                    <td class="p-2">R$ ${p.price.toFixed(2)}</td>
+                    <td class="p-2"><button onclick="deleteProduct(${p.id})" class="text-red-400 text-xs hover:underline">Excluir</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteProduct(id) {
+            products = products.filter(p => p.id !== id);
+            renderAdminManageList();
+            renderFeatured();
+            renderCatalog();
+        }
+
+        function renderAdminOrdersList() {
+            const tbody = document.getElementById('admin-orders-list');
+            let localOrders = JSON.parse(localStorage.getItem('sakura_orders') || '[]');
+            if(localOrders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhum pedido registrado ainda.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = localOrders.map(o => `
+                <tr class="border-b border-neutral-800 text-xs">
+                    <td class="p-2">${o.timestamp}</td>
+                    <td class="p-2">${o.clientName}</td>
+                    <td class="p-2">${o.clientPhone}</td>
+                    <td class="p-2">${o.productName}</td>
+                    <td class="p-2">${o.color} / ${o.size}</td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
